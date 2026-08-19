@@ -20,6 +20,7 @@ config/icon="res://icon.svg"
 
 EventBus="*res://src/core/event_bus.gd"
 PlayerProgress="*res://src/core/player_progress.gd"
+ItemDb="*res://src/core/item_db.gd"
 Inventory="*res://src/core/inventory.gd"
 QuestLog="*res://src/core/quest_log.gd"
 AudioDirector="*res://src/core/audio_director.gd"

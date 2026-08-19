@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b930a9f1a8d35f"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"tear"
+display_name = "Crystalized Tear"
+hover_hint = "What a wraith leaves behind. Cold to the touch."
+max_stack = 99
+sell_price = 8

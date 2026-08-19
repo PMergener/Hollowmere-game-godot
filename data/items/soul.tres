@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://ba35fb63b4f053"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"soul"
+display_name = "Soul powder"
+description = "The only remedy in Hollowmere. Ondrick will not touch it."
+hover_hint = "restores 40 vigour"
+max_stack = 9
+consume_on_use = true
+heal_amount = 40
+can_sell = false

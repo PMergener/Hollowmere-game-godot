@@ -39,7 +39,6 @@ var stam := STAM_N
 var tired := false
 var _stam_idle := STAM_DELAY
 
-var souls := 3
 var can_act := true
 
 var tex_lamp: Texture2D
@@ -84,8 +83,7 @@ func _process(delta: float) -> void:
 	if can_act and Input.is_action_just_pressed(&"attack"):
 		_try_swing()
 	if can_act and Input.is_action_just_pressed(&"toggle_lamp"):
-		lamp_on = not lamp_on
-		held_light = "lamp" if lamp_on else ""
+		_toggle_light("lamp")
 	if Input.is_action_just_pressed(&"toggle_mute"):
 		Sfx.toggle_mute()
 
@@ -190,15 +188,42 @@ func _apply_shake(delta: float) -> void:
 		cam.offset = Vector2.ZERO
 
 
+## Using any pack slot: the lamp and torch toggle the light, soul powder heals,
+## anything else (a weapon, armour) falls through to the pack's own use. The
+## branching lives here because a "use" acts on the player - its light, its
+## health - not on the pack. Shared by the belt keys and the pack panel.
+func use_item_slot(index: int) -> void:
+	var st := Inventory.slot(index)
+	if st == null or st.item == null:
+		return
+	var id := st.item.id
+	if id == &"soul":
+		consume_soul()
+	elif id == &"lamp" or id == &"torch":
+		_toggle_light(String(id))
+	else:
+		Inventory.use_slot(index)
+
+
+func _toggle_light(kind: String) -> void:
+	if held_light == kind:
+		held_light = ""
+	elif kind == "torch" or lamp > 1.0:
+		held_light = kind
+	lamp_on = held_light == "lamp"
+
+
 func consume_soul() -> bool:
-	if souls <= 0 or dead:
+	if dead or Inventory.count_of(&"soul") <= 0:
 		return false
 	if hp >= hp_max:
 		denied = 0.5
+		Sfx.play(&"denied")
 		return false
-	souls -= 1
+	Inventory.remove(&"soul", 1)
 	hp = minf(hp_max, hp + 40.0)
 	heal = 0.7
+	Sfx.play(&"heal")
 	return true
 
 

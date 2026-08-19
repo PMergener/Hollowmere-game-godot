@@ -29,6 +29,26 @@ var worn: Dictionary = {}
 
 func _ready() -> void:
 	clear()
+	_give_starting_kit()
+
+
+## What Nestor sets out with: the lamp and torch on the belt, one dose of soul
+## powder, and the short sword in hand. All by id, so a designer re-kits the
+## start by editing which items exist, not this code.
+func _give_starting_kit() -> void:
+	var lamp := ItemDb.get_item(&"lamp")
+	var torch := ItemDb.get_item(&"torch")
+	var soul := ItemDb.get_item(&"soul")
+	if lamp != null:
+		pack[0] = ItemStack.of(lamp, 1)
+	if torch != null:
+		pack[1] = ItemStack.of(torch, 1)
+	if soul != null:
+		pack[2] = ItemStack.of(soul, 3)
+	var sword := ItemDb.get_item(&"sword")
+	if sword is WeaponData:
+		weapon = ItemStack.of(sword, 1)
+	_changed()
 
 
 func clear() -> void:
@@ -263,6 +283,8 @@ func use_slot(index: int) -> bool:
 
 	if item.heal_amount > 0:
 		EventBus.emit_event(&"item_consumed", { "item": item.id, "heal": item.heal_amount })
+	if item.use_event != &"":
+		EventBus.emit_event(item.use_event, { "item": item.id })
 
 	if item.consume_on_use:
 		stack.amount -= 1

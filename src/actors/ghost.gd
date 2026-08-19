@@ -127,9 +127,21 @@ func _think(delta: float) -> void:
 
 
 func _on_vanished() -> void:
-	# A crystalized tear and soul-powder mote are left behind; wiring them into
-	# the pack waits on the inventory port. For now the kill still pays XP.
+	# A soul-powder mote always, and a crystalized tear to carry off.
+	_drop(&"soul", 1, Vector2(-4, 6))
+	_drop(&"tear", 1, Vector2(11, 5))
 	respawn = 15.0 + randf() * 12.0
+
+
+func _drop(id: StringName, amount: int, offset: Vector2) -> void:
+	var parent := get_parent()
+	if parent == null:
+		return
+	var p := Pickup.new()
+	p.item_id = id
+	p.amount = amount
+	p.position = position + offset
+	parent.add_child(p)
 
 
 func _while_gone(delta: float) -> void:

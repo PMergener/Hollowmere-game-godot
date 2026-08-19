@@ -1,4 +1,4 @@
-[gd_scene load_steps=8 format=3 uid="uid://cmain000001"]
+[gd_scene load_steps=9 format=3 uid="uid://cmain000001"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://src/systems/weather.gd" id="2_weather"]
@@ -6,6 +6,7 @@
 [ext_resource type="Script" path="res://src/ui/hud.gd" id="4_hud"]
 [ext_resource type="Script" path="res://src/ui/hud_painter.gd" id="5_hpaint"]
 [ext_resource type="Script" path="res://src/ui/messages.gd" id="6_msg"]
+[ext_resource type="Script" path="res://src/ui/pack_panel.gd" id="7_pack"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -36,3 +37,9 @@ script = ExtResource("5_hpaint")
 
 [node name="Messages" type="CanvasLayer" parent="."]
 script = ExtResource("6_msg")
+
+[node name="PackPanel" type="CanvasLayer" parent="."]
+script = ExtResource("7_pack")
+
+[node name="Painter" type="Node2D" parent="PackPanel"]
+script = ExtResource("5_hpaint")

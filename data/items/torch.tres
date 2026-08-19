@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://b7d7d60bc3397e"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"torch"
+display_name = "Pitch torch"
+hover_hint = "Reaches further than the lamp, and never runs dry - but it does not burn them."
+use_event = &"use_torch"
+can_sell = false

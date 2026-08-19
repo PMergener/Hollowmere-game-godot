@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://bbbc1614e9296c"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"key"
+display_name = "Sewer Key"
+hover_hint = "Iron, and older than the lock it opens."
+can_sell = false

@@ -46,6 +46,11 @@ extends Resource
 @export var consume_on_use: bool = false
 ## Health restored on use. 0 for anything that is not a remedy.
 @export var heal_amount: int = 0
+## Fired on [EventBus] when the item is used, for anything that is neither a
+## remedy nor a piece of gear - the lamp raises itself, the torch lights. Leave
+## empty for items that do nothing when used. A designer wires a new verb by
+## naming an event here and having something listen for it.
+@export var use_event: StringName = &""
 
 
 ## True when two stacks are the same thing and may be merged.

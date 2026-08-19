@@ -27,9 +27,9 @@ const ORB_LAMP := {
 	"lo": Color8(8, 58, 30), "glow": Color8(30, 150, 80), "phase": 2.1,
 }
 
-# what sits in the belt, by item key. Slots 0-8 are the hotbar.
-var belt: Array = ["lamp", "torch", "soul", "", "", "", "", "", ""]
-var selected := -1
+# The belt IS the first nine pack slots - not a separate list. The HUD reads
+# them straight off the Inventory, so a pickup or a used-up dose shows here with
+# no bookkeeping of its own.
 var player: Node2D = null
 var t := 0.0
 
@@ -41,29 +41,23 @@ func _process(delta: float) -> void:
 	painter.queue_redraw()
 
 
+## The item id in belt slot [param i], or "" when empty.
+func _belt_id(i: int) -> String:
+	var st: ItemStack = Inventory.slot(i)
+	if st == null or st.item == null:
+		return ""
+	return String(st.item.id)
+
+
+func _belt_count(i: int) -> int:
+	var st: ItemStack = Inventory.slot(i)
+	return st.amount if st != null else 0
+
+
 func _unhandled_input(e: InputEvent) -> void:
 	if e is InputEventKey and e.pressed and not e.echo:
-		if e.keycode >= KEY_1 and e.keycode <= KEY_9:
-			var i: int = e.keycode - KEY_1
-			if belt[i] == "" or player == null:
-				return
-			var key: String = belt[i]
-			if key == "soul":
-				# a CONSUMABLE - pressing it uses one, it is not a selection
-				player.consume_soul()
-				return
-			if key == "lamp" or key == "torch":
-				# One light at a time, and pressing the one you are holding puts
-				# it away. The lamp additionally has to have charge left.
-				if player.held_light == key:
-					player.held_light = ""
-					selected = -1
-				elif key == "torch" or player.lamp > 1.0:
-					player.held_light = key
-					selected = i
-				player.lamp_on = player.held_light == "lamp"
-			else:
-				selected = -1 if selected == i else i
+		if e.keycode >= KEY_1 and e.keycode <= KEY_9 and player != null:
+			player.use_item_slot(e.keycode - KEY_1)
 
 
 func paint(ci: CanvasItem) -> void:
@@ -130,19 +124,13 @@ func _bar(ci: CanvasItem) -> void:
 	for i in BAR_N:
 		var x := BAR_X + i * (SLOT_W + SLOT_GAP)
 		var y := float(BAR_Y)
-		var key: String = belt[i]
-		# a consumable you have none of is an empty slot
+		var key: String = _belt_id(i)
 		var has: bool = key != ""
-		if has and key == "soul" and player and player.souls <= 0:
-			has = false
 		# For a light, "selected" means IT IS THE ONE IN YOUR HAND - not merely
 		# the last slot you pressed. That is what the highlight is telling you.
 		var sel: bool = false
-		if has:
-			if player and (key == "lamp" or key == "torch"):
-				sel = player.held_light == key
-			else:
-				sel = i == selected
+		if has and player and (key == "lamp" or key == "torch"):
+			sel = player.held_light == key
 		ci.draw_rect(Rect2(x, y, SLOT_W, SLOT_W),
 			Color(0.102, 0.094, 0.071, 0.92) if sel else Color(0.035, 0.039, 0.051, 0.84), true)
 		var bc := Color("232322")
@@ -184,9 +172,10 @@ func _bar(ci: CanvasItem) -> void:
 					var pu2 := 0.4 + 0.6 * sin(t * 3.2)
 					ci.draw_rect(Rect2(x + 5, y - 4, SLOT_W - 10, 2),
 						Color8(int(70 * pu2), int(200 * pu2), int(120 * pu2), 204), true)
-			# how many you have left
-			if key == "soul" and player:
-				var n := str(player.souls)
+			# how many you have left, for anything that stacks
+			var cnt := _belt_count(i)
+			if cnt > 1:
+				var n := str(cnt)
 				for d in n.length():
 					_digit(ci, int(n[d]), x + SLOT_W - 5 - (n.length() - d) * 4, y + SLOT_W - 9,
 						Color("9ee0b6"))

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://b1d399f4fea485"]
+
+[ext_resource type="Script" path="res://src/resources/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sword"
+display_name = "Short sword"
+description = "Plain, balanced, and yours."
+damage = 5
+reach = 0.0
+cooldown = 0.44
+style = 0

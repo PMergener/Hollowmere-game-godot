@@ -1,0 +1,7 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+tools/.chrome-profile/
+tools/.bake*.html
+tools/screenshot.png

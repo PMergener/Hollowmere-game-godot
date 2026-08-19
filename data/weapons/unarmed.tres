@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://cunarm0hollow1"]
+
+[ext_resource type="Script" path="res://src/resources/weapon_data.gd" id="1_wpn"]
+
+[resource]
+script = ExtResource("1_wpn")
+id = &"unarmed"
+display_name = "Bare hands"
+description = "Nothing in your grip but resolve."
+max_stack = 1
+damage = 3
+reach = 12.0
+cooldown = 0.36
+stamina_cost = 0.333
+style = 0
+arc_degrees = 60.0
+windup = 0.1
+strike = 0.09
+recover = 0.14

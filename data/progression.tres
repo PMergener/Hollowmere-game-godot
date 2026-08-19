@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="ProgressionData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://src/resources/progression_data.gd" id="1_prog"]
+
+[resource]
+script = ExtResource("1_prog")
+xp_for_level_two = 50
+xp_multiplier = 1.85
+max_level = 10
+health_per_level = 12
+lamp_charge_per_level = 4
+damage_every_n_levels = 2
+starting_health = 150
+starting_gold = 0
+starting_embers = 0

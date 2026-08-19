@@ -1,0 +1,58 @@
+[gd_scene load_steps=3 format=3 uid="uid://cvillage0001"]
+
+[ext_resource type="Script" path="res://src/world/game_area.gd" id="1_area"]
+[ext_resource type="Resource" uid="uid://cvillag0hollow1" path="res://data/areas/village.tres" id="2_data"]
+[ext_resource type="Script" path="res://src/world/spawn_point.gd" id="3_spawn"]
+
+[sub_resource type="RectangleShape2D" id="ground_shape"]
+size = Vector2(400, 300)
+
+[sub_resource type="RectangleShape2D" id="wall_top"]
+size = Vector2(440, 20)
+
+[sub_resource type="RectangleShape2D" id="wall_bottom"]
+size = Vector2(440, 20)
+
+[sub_resource type="RectangleShape2D" id="wall_left"]
+size = Vector2(20, 340)
+
+[sub_resource type="RectangleShape2D" id="wall_right"]
+size = Vector2(20, 340)
+
+[node name="Village" type="Node2D"]
+script = ExtResource("1_area")
+area_data = ExtResource("2_data")
+camera_limits = Rect2(-220, -170, 440, 340)
+
+[node name="Ground" type="ColorRect" parent="."]
+offset_left = -200.0
+offset_top = -150.0
+offset_right = 200.0
+offset_bottom = 150.0
+color = Color(0.12, 0.11, 0.1, 1)
+
+[node name="Walls" type="StaticBody2D" parent="."]
+collision_layer = 1
+collision_mask = 0
+
+[node name="Top" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, -160)
+shape = SubResource("wall_top")
+
+[node name="Bottom" type="CollisionShape2D" parent="Walls"]
+position = Vector2(0, 160)
+shape = SubResource("wall_bottom")
+
+[node name="Left" type="CollisionShape2D" parent="Walls"]
+position = Vector2(-220, 0)
+shape = SubResource("wall_left")
+
+[node name="Right" type="CollisionShape2D" parent="Walls"]
+position = Vector2(220, 0)
+shape = SubResource("wall_right")
+
+[node name="DefaultSpawn" type="Marker2D" parent="."]
+position = Vector2(0, 40)
+script = ExtResource("3_spawn")
+point_name = &"default"
+facing = Vector2(0, -1)

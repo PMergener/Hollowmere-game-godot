@@ -67,12 +67,23 @@ signal dialogue_finished()
 ## Ask the dialogue box to speak some plain lines. The simplest way to make an
 ## NPC talk: emit this with who is speaking and what they say.
 signal dialogue_requested(speaker: String, lines: PackedStringArray)
+## Richer talk: pages that can carry branching choices. Each page is a Dictionary
+## {"text": String} or {"text": String, "choices": [{"label": String, "fn": Callable}]}.
+## Used by Herbert and the quest-givers, where the HTML offered a Yes/No.
+signal dialogue_pages_requested(speaker: String, pages: Array)
 signal note_read(title: String, body: String)
 ## A line of feedback across the middle of the screen.
 signal toast_requested(text: String)
+## A big titled banner for a landmark moment - a level, a quest closed, a gate
+## given. [param gold] picks the tone (gold for triumph, red for dread).
+signal banner_requested(main: String, sub: String, gold: bool)
 ## The action available on whatever the player is standing next to, or "" when
 ## there is nothing to act on. Drives the little "[E] Speak" prompt.
 signal interaction_prompt(text: String)
+## Ondrick asks the shop to open.
+signal shop_requested()
+## A door or shaft asks to move the player to another area, arriving at [spawn].
+signal travel_requested(target: StringName, spawn: Vector2)
 
 @warning_ignore_restore("unused_signal")
 
@@ -89,3 +100,8 @@ func emit_event(name: StringName, payload: Dictionary = {}) -> void:
 ## Convenience for the commonest piece of feedback.
 func toast(text: String) -> void:
 	toast_requested.emit(text)
+
+
+## A landmark banner. Sub may be "" for a single line.
+func banner(main: String, sub: String = "", gold: bool = true) -> void:
+	banner_requested.emit(main, sub, gold)

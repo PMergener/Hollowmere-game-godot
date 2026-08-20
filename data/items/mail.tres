@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ArmorData" load_steps=2 format=3 uid="uid://cb491b59cafbf"]
+
+[ext_resource type="Script" path="res://src/resources/armor_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"mail"
+display_name = "Rusted Mail"
+description = "Rings and rust. Turns a bite into a bruise."
+buy_price = 30
+can_sell = false
+slot = 4
+armor = 2

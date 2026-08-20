@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://c428a216a2f33"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"rope"
+display_name = "Frayed rope"
+hover_hint = "Long enough to lower yourself into the well."
+can_sell = false

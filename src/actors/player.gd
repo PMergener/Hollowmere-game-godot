@@ -11,7 +11,7 @@ extends Actor
 const SPD := 78.0
 const AIM_DEAD_ZONE := 6.0
 
-const LAMP_MAX := 100.0
+var lamp_max := 100.0
 const LAMP_DRAIN := 2.0
 const LAMP_REGEN := 1.0
 
@@ -32,7 +32,7 @@ var denied := 0.0
 var dead := false
 
 var lamp_on := false
-var lamp := LAMP_MAX
+var lamp := 100.0
 var held_light := ""
 
 var stam := STAM_N
@@ -46,6 +46,7 @@ var tex_torch: Texture2D
 
 var _aim := Vector2.DOWN
 var _shake := 0.0
+var _steal_t := 0.0
 
 @onready var light: PointLight2D = $Light
 @onready var melee: MeleeAttack = $Melee
@@ -59,7 +60,26 @@ func _ready() -> void:
 	melee.target_hit.connect(func(_target):
 		_shake = maxf(_shake, 1.3)
 		Sfx.play(&"hit"))
+	# Soul Steal: a kill starts 3 seconds of healing (5 HP/s), refreshing.
+	EventBus.enemy_died.connect(func(_id, _pos):
+		if SkillDb.effect_total(&"soul_steal") > 0.0:
+			_steal_t = 3.0)
+	# Vigour and lamp capacity grow with the level. The progression already knows
+	# the numbers (+12 HP, +4 lamp a level); the player just has to apply them, and
+	# a level's worth of each is healed on the way up - the HTML's applyLevelReward.
+	hp_max = float(PlayerProgress.max_health())
+	lamp_max = 100.0 + float(PlayerProgress.lamp_bonus())
+	EventBus.level_gained.connect(_on_level_gained)
 	EventBus.player_spawned.emit(self)
+
+
+func _on_level_gained(_new_level: int) -> void:
+	var old_hp_max := hp_max
+	var old_lamp_max := lamp_max
+	hp_max = float(PlayerProgress.max_health())
+	lamp_max = 100.0 + float(PlayerProgress.lamp_bonus())
+	hp = minf(hp_max, hp + (hp_max - old_hp_max))
+	lamp = minf(lamp_max, lamp + (lamp_max - old_lamp_max))
 
 
 func _process(delta: float) -> void:
@@ -70,6 +90,9 @@ func _process(delta: float) -> void:
 		heal = maxf(0.0, heal - delta * 1.4)
 	if denied > 0.0:
 		denied = maxf(0.0, denied - delta * 2.0)
+	if _steal_t > 0.0 and not dead:
+		_steal_t -= delta
+		hp = minf(hp_max, hp + 5.0 * delta)  # Soul Steal, 5 HP/s
 
 	_update_aim()
 	var running := _handle_movement(delta)
@@ -114,9 +137,21 @@ func _try_swing() -> void:
 	if not melee.can_swing():
 		return
 	_spend_stamina(STAM_ATTACK)
+	# The swing carries the equipped weapon's damage plus levelled edge - not the
+	# component's own default. Without this the sword dealt the MeleeAttack default
+	# (8) instead of the short sword's 5, and wraiths (15 HP) died in 2 hits, not 3.
+	melee.damage = _swing_damage()
 	melee.swing(facing)
 	melee.begin_cooldown(stamina_rate())
 	Sfx.play(&"swing")
+
+
+## Damage a swing deals: the held weapon (or 1 for bare hands) plus levelled edge.
+## Mirrors the HTML's weaponDmg() = EQUIP.weapon.dmg + edgeBonus.
+func _swing_damage() -> int:
+	var weapon := Inventory.held_weapon()
+	var base := weapon.damage if weapon != null else 1
+	return base + PlayerProgress.damage_bonus()
 
 
 func _update_aim() -> void:
@@ -153,8 +188,10 @@ func _update_lamp(delta: float) -> void:
 		if lamp <= 0.0:
 			lamp_on = false
 			held_light = ""
-	elif lamp < LAMP_MAX:
-		lamp = minf(LAMP_MAX, lamp + LAMP_REGEN * delta)
+	elif lamp < lamp_max:
+		# Perseverance adds to the stowed regen rate (1/s base, +2 per rank).
+		var regen := LAMP_REGEN + SkillDb.effect_total(&"lamp_regen")
+		lamp = minf(lamp_max, lamp + regen * delta)
 
 
 func _update_light() -> void:
@@ -162,6 +199,8 @@ func _update_light() -> void:
 		light.enabled = false
 		return
 	light.enabled = true
+	# Thy Flame widens what the light reaches (+25% per rank), scaling the pool.
+	light.texture_scale = 1.0 + SkillDb.effect_total(&"light_radius")
 	if held_light == "lamp":
 		if tex_lamp != null and light.texture != tex_lamp:
 			light.texture = tex_lamp
@@ -230,10 +269,13 @@ func consume_soul() -> bool:
 	return true
 
 
-func take_damage(dmg: float, armour: float = 0.0) -> void:
+func take_damage(dmg: float, _armour: float = 0.0) -> void:
 	if dead:
 		return
-	hp = maxf(0.0, hp - maxf(1.0, dmg - armour))
+	# Armour subtracts flat from every blow, floor of 1 - the HTML's hurtPlayer.
+	# A 24-40 wraith hit lands 19-35 through the base kit's 5; plate makes it hurt
+	# less, but nothing ever makes you immune.
+	hp = maxf(0.0, hp - maxf(1.0, dmg - Inventory.armor_total()))
 	hurt = 0.55
 	_shake = maxf(_shake, 1.7)
 	Sfx.play(&"hurt")

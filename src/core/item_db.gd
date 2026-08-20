@@ -27,3 +27,8 @@ func get_item(id: StringName) -> ItemData:
 
 func has(id: StringName) -> bool:
 	return _by_id.has(id)
+
+
+## Every item, for the shop to list buyables and for tools to enumerate content.
+func all() -> Array:
+	return _by_id.values()

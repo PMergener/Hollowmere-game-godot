@@ -51,6 +51,8 @@ extends Resource
 ## empty for items that do nothing when used. A designer wires a new verb by
 ## naming an event here and having something listen for it.
 @export var use_event: StringName = &""
+## Ticked, the shop keeps selling it. Clear for one-time stock (the Sewer Key).
+@export var restock: bool = true
 
 
 ## True when two stacks are the same thing and may be merged.

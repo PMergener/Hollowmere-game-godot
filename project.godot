@@ -20,9 +20,11 @@ config/icon="res://icon.svg"
 
 EventBus="*res://src/core/event_bus.gd"
 PlayerProgress="*res://src/core/player_progress.gd"
+SkillDb="*res://src/core/skill_db.gd"
 ItemDb="*res://src/core/item_db.gd"
 Inventory="*res://src/core/inventory.gd"
 QuestLog="*res://src/core/quest_log.gd"
+NotesLog="*res://src/core/notes_log.gd"
 AudioDirector="*res://src/core/audio_director.gd"
 SceneDirector="*res://src/core/scene_director.gd"
 CollisionMap="*res://src/world/collision_map.gd"
@@ -35,6 +37,10 @@ window/size/viewport_height=360
 window/size/window_width_override=1152
 window/size/window_height_override=720
 window/stretch/mode="viewport"
+
+[editor_plugins]
+
+enabled=PackedStringArray("res://addons/rpg_editor/plugin.cfg")
 
 [input]
 

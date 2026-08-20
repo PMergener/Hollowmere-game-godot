@@ -8,4 +8,4 @@ id = &"tear"
 display_name = "Crystalized Tear"
 hover_hint = "What a wraith leaves behind. Cold to the touch."
 max_stack = 99
-sell_price = 8
+sell_price = 5

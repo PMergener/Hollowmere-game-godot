@@ -17,6 +17,14 @@ func _process(_delta: float) -> void:
 		if _player == null:
 			return
 
+	# When a dialogue or menu has frozen the player, hide the prompt and take no
+	# interactions - E belongs to the open panel then, not to re-triggering an NPC.
+	if "can_act" in _player and not _player.can_act:
+		if _current != null:
+			_current = null
+			EventBus.interaction_prompt.emit("")
+		return
+
 	var best: Node = null
 	var best_d := INF
 	for node in get_tree().get_nodes_in_group(&"interactable"):

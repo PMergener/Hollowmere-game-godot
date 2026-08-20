@@ -22,7 +22,14 @@ const WIND := -0.17
 var drops: Array = []
 var splashes: Array = []
 var grain_tex: ImageTexture
+var fog_tex: ImageTexture
+var fog_node: Node2D
 var t := 0.0
+## Rain is a village thing; the vignette and grain are not. Underground this goes
+## false so the sky stops raining into the crypt, but the frame is still crushed at
+## the edges and still carries its film - which is most of what atmosphere means
+## here, and it was vanishing the moment you went below.
+var raining := true
 
 @onready var painter: Node2D = $Painter
 
@@ -38,6 +45,40 @@ func _ready() -> void:
 			var v := randf()
 			img.set_pixel(x, y, Color(v, v, v, 22.0 / 255.0))
 	grain_tex = ImageTexture.create_from_image(img)
+	_build_fog()
+
+
+func _build_fog() -> void:
+	# A soft radial blob tinted the HTML's fog colour, alpha falling to nothing at
+	# r135. Drawn additively it lifts the dark; drawn normally it would be a ball.
+	var fr := 135
+	var fog_img := Image.create(fr * 2, fr * 2, false, Image.FORMAT_RGBA8)
+	var fc := Color(38.0 / 255.0, 44.0 / 255.0, 58.0 / 255.0)
+	for y in fr * 2:
+		for x in fr * 2:
+			var dd := Vector2(x - fr, y - fr).length() / float(fr)
+			var a := clampf(1.0 - dd, 0.0, 1.0)
+			fog_img.set_pixel(x, y, Color(fc.r, fc.g, fc.b, a * a * 0.10))
+	fog_tex = ImageTexture.create_from_image(fog_img)
+
+	fog_node = Node2D.new()
+	fog_node.set_script(load("res://src/systems/fog_painter.gd"))
+	var mat := CanvasItemMaterial.new()
+	mat.blend_mode = CanvasItemMaterial.BLEND_MODE_ADD
+	fog_node.material = mat
+	add_child(fog_node)
+	move_child(fog_node, 0)   # under the rain, the vignette and the grain
+
+
+func paint_fog(ci: CanvasItem) -> void:
+	# Five additive blobs drifting across the frame - the HTML's drawFog, village
+	# mist only (raining doubles as "above ground" here).
+	if not raining:
+		return
+	for i in 5:
+		var fx := fmod(t * 10.0 + i * 170.0, 576.0 + 400.0) - 200.0
+		var fy := 50.0 + i * 66.0 + sin(t * 0.5 + i) * 14.0
+		ci.draw_texture(fog_tex, Vector2(fx - 135.0, fy - 135.0))
 
 
 func _seed_drop(d: Dictionary, init: bool) -> Dictionary:
@@ -55,6 +96,12 @@ func _seed_drop(d: Dictionary, init: bool) -> Dictionary:
 
 func _process(delta: float) -> void:
 	t += delta
+	if fog_node != null:
+		fog_node.queue_redraw()
+	if not raining:
+		splashes.clear()
+		painter.queue_redraw()
+		return
 	for d in drops:
 		d.y += d.v * delta
 		d.x += d.v * delta * WIND
@@ -79,19 +126,21 @@ func paint(ci: CanvasItem) -> void:
 	# the screen, which is worse than no fog at all in a game that is supposed to
 	# be almost entirely dark. Doing it properly needs a second CanvasItem
 	# carrying a CanvasItemMaterial in ADD mode; until then, nothing.
-	for s in splashes:
-		var a: float = s.life * 0.42
-		if s.life > 0.55:
-			ci.draw_rect(Rect2(s.x - 1, s.y, 3, 1), Color(0.729, 0.800, 0.878, a), true)
-		else:
-			ci.draw_rect(Rect2(s.x - 3, s.y, 1, 1), Color(0.627, 0.706, 0.792, a), true)
-			ci.draw_rect(Rect2(s.x + 3, s.y, 1, 1), Color(0.627, 0.706, 0.792, a), true)
-	for d in drops:
-		var h1: float = d.len * 0.5
-		ci.draw_rect(Rect2(round(d.x), round(d.y), 1, ceil(h1)),
-			Color(0.776, 0.839, 0.910, d.a), true)
-		ci.draw_rect(Rect2(round(d.x) - 1, round(d.y) + h1, 1, ceil(h1)),
-			Color(0.776, 0.839, 0.910, d.a * 0.7), true)
+	if raining:
+		for s in splashes:
+			var a: float = s.life * 0.42
+			if s.life > 0.55:
+				ci.draw_rect(Rect2(s.x - 1, s.y, 3, 1), Color(0.729, 0.800, 0.878, a), true)
+			else:
+				ci.draw_rect(Rect2(s.x - 3, s.y, 1, 1), Color(0.627, 0.706, 0.792, a), true)
+				ci.draw_rect(Rect2(s.x + 3, s.y, 1, 1), Color(0.627, 0.706, 0.792, a), true)
+		for d in drops:
+			var h1: float = d.len * 0.5
+			ci.draw_rect(Rect2(round(d.x), round(d.y), 1, ceil(h1)),
+				Color(0.776, 0.839, 0.910, d.a), true)
+			ci.draw_rect(Rect2(round(d.x) - 1, round(d.y) + h1, 1, ceil(h1)),
+				Color(0.776, 0.839, 0.910, d.a * 0.7), true)
+	# vignette and grain draw in every area, rain or no rain
 	_vignette(ci)
 	_grain(ci)
 

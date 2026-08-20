@@ -35,11 +35,13 @@ func xp_to_reach(level: int) -> int:
 	return int(need)
 
 
-## Bonus weapon damage earned by reaching this level.
+## Bonus weapon damage earned by reaching this level. The HTML grants +1 edge AT
+## each even level (applyLevelReward runs after LVL++), so the count is level/N,
+## not (level-1)/N - the latter paid the edge a level late.
 func damage_bonus_at(level: int) -> int:
 	if damage_every_n_levels <= 0:
 		return 0
-	return (level - 1) / damage_every_n_levels
+	return level / damage_every_n_levels
 
 
 func max_health_at(level: int) -> int:

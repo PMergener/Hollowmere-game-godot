@@ -65,10 +65,44 @@ func paint(ci: CanvasItem) -> void:
 	var lamp := 1.0
 	if player:
 		hp = clampf(player.hp / player.hp_max, 0.0, 1.0)
-		lamp = clampf(player.lamp / player.LAMP_MAX, 0.0, 1.0)
+		lamp = clampf(player.lamp / player.lamp_max, 0.0, 1.0)
 	_orb(ci, BAR_X - ORB_R - 9, BAR_Y + SLOT_W - ORB_R, ORB_HP, hp)
 	_orb(ci, BAR_X + BAR_W + ORB_R + 9, BAR_Y + SLOT_W - ORB_R, ORB_LAMP, lamp)
+	_stamina(ci)
 	_bar(ci)
+
+
+# Stamina - it IS in the HTML (I was wrong to call it Godot-only). Ported exactly
+# from drawStamina: ten genuinely square 8x8 nuggets, 2px apart, 98px wide, centred
+# in the action bar and drawn 13px above it. Each fills from its LEFT edge, so a
+# third of a nugget reads as a third. GREEN (#3f8a5c), not amber; exhausted, the
+# whole row breathes green - the only signal the 30% penalty is on.
+const STAM_SQ := 8.0
+const STAM_GAPX := 2.0
+const STAM_W := 10 * STAM_SQ + 9 * STAM_GAPX      # 98
+func _stamina(ci: CanvasItem) -> void:
+	if player == null:
+		return
+	var stam: float = clampf(player.stam, 0.0, player.STAM_N)
+	var tired: bool = player.tired
+	var sx0 := roundf(BAR_X + (BAR_W - STAM_W) / 2.0)
+	var sy := float(BAR_Y) - 13.0
+	var pulse := (0.55 + 0.45 * sin(t * 6.2)) if tired else 1.0
+	for i in 10:
+		var x := sx0 + i * (STAM_SQ + STAM_GAPX)
+		ci.draw_rect(Rect2(x - 1, sy - 1, STAM_SQ + 2, STAM_SQ + 2), Color(6.0 / 255, 8.0 / 255, 7.0 / 255, 0.85), true)
+		ci.draw_rect(Rect2(x, sy, STAM_SQ, STAM_SQ), Color("141815"), true)
+		var f: float = clampf(stam - float(i), 0.0, 1.0)
+		if f > 0.0:
+			var w := maxf(1.0, roundf(STAM_SQ * f))
+			var g := Color(70.0 * pulse / 255, 120.0 * pulse / 255, 84.0 * pulse / 255) if tired else Color("3f8a5c")
+			ci.draw_rect(Rect2(x, sy, w, STAM_SQ), g, true)
+			var hi := Color(110.0 * pulse / 255, 180.0 * pulse / 255, 126.0 * pulse / 255) if tired else Color("5fbe80")
+			ci.draw_rect(Rect2(x, sy, w, 1), hi, true)
+			ci.draw_rect(Rect2(x, sy + STAM_SQ - 1, w, 1), Color("24513a"), true)
+		var bc := Color(90.0 * pulse / 255, 70.0 * pulse / 255, 60.0 * pulse / 255) if tired else Color("2b2f2a")
+		ci.draw_rect(Rect2(x, sy, STAM_SQ, 1), bc, true)
+		ci.draw_rect(Rect2(x, sy + STAM_SQ - 1, STAM_SQ, 1), bc, true)
 
 
 # One orb. Drawn pixel by pixel because the surface wave, the depth gradient and

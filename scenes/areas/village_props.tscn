@@ -1,25 +1,30 @@
-[gd_scene load_steps=6 format=3 uid="uid://d14c7c7f9457c"]
+[gd_scene format=3 uid="uid://d14c7c7ga457c"]
 
-[ext_resource type="PackedScene" uid="uid://d6f1443227323" path="res://scenes/props/trees/tree_5.tscn" id="1"]
+[ext_resource type="PackedScene" uid="uid://b06j26ti08cc" path="res://scenes/props/trees/tree_5.tscn" id="1"]
 [ext_resource type="PackedScene" uid="uid://d4bb82f33264f" path="res://scenes/props/trees/tree_7.tscn" id="2"]
-[ext_resource type="PackedScene" uid="uid://dabc093b2a035" path="res://scenes/props/rocks/rock_1.tscn" id="3"]
-[ext_resource type="PackedScene" uid="uid://d9e0d88edaa30" path="res://scenes/props/chests/chest_2.tscn" id="4"]
+[ext_resource type="PackedScene" uid="uid://dabc1a3b2a035" path="res://scenes/props/rocks/rock_1.tscn" id="3"]
+[ext_resource type="PackedScene" uid="uid://ey4r7b4r2fc8" path="res://scenes/props/chests/chest_2.tscn" id="4"]
 [ext_resource type="PackedScene" uid="uid://df23363018a8a" path="res://scenes/props/boxes/box_3.tscn" id="5"]
+[ext_resource type="Texture2D" uid="uid://c61a12af5f0ab" path="res://assets/props/boxes/box_1.png" id="6_0bacc"]
 
-[node name="VillageProps" type="Node2D"]
+[node name="VillageProps" type="Node2D" unique_id=587807154]
 y_sort_enabled = true
 
-[node name="Tree5" parent="." instance=ExtResource("1")]
+[node name="Tree5" parent="." unique_id=1075798744 instance=ExtResource("1")]
 position = Vector2(540, 648)
 
-[node name="Tree7" parent="." instance=ExtResource("2")]
+[node name="Tree7" parent="." unique_id=369341663 instance=ExtResource("2")]
 position = Vector2(668, 642)
 
-[node name="Rock1" parent="." instance=ExtResource("3")]
+[node name="Rock1" parent="." unique_id=458461600 instance=ExtResource("3")]
 position = Vector2(628, 700)
 
-[node name="Chest2" parent="." instance=ExtResource("4")]
+[node name="Chest2" parent="." unique_id=1288464274 instance=ExtResource("4")]
 position = Vector2(560, 700)
 
-[node name="Box3" parent="." instance=ExtResource("5")]
-position = Vector2(706, 694)
+[node name="Box3" parent="." unique_id=246990255 instance=ExtResource("5")]
+position = Vector2(715, 694)
+
+[node name="Box1" type="Sprite2D" parent="." unique_id=1542247988]
+position = Vector2(510, 711)
+texture = ExtResource("6_0bacc")

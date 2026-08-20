@@ -24,11 +24,17 @@ func _process(delta: float) -> void:
 	# Only the things that actually move ask for a redraw. Houses, trees, graves
 	# and the cart are drawn once and cached; the HTML build had to redraw every
 	# one of them every frame.
-	if kind == Kind.BRAZIER or kind == Kind.PYRE or kind == Kind.WELL:
+	# Lit houses redraw too - only for the wisp of chimney smoke, which is the one
+	# moving thing on an otherwise static building.
+	if kind == Kind.BRAZIER or kind == Kind.PYRE or kind == Kind.WELL \
+			or (kind == Kind.HOUSE and lit and not ruin):
 		t += delta
 		queue_redraw()
 		if light:
-			light.energy = 0.9 + sin(t * 9.0 + ph) * 0.06 + sin(t * 17.0 + ph) * 0.04
+			# A warm pool that actually reads on the ground, not a faint halo -
+			# the flicker rides a brighter base so a brazier looks lit, not merely
+			# drawn. Two detuned sines keep the flame from settling into a pulse.
+			light.energy = 1.35 + sin(t * 9.0 + ph) * 0.12 + sin(t * 17.0 + ph) * 0.07
 
 
 func _draw() -> void:
@@ -118,39 +124,86 @@ func _draw_house() -> void:
 	draw_set_transform(Vector2.ZERO, 0.0, Vector2.ONE)
 
 
+# Ported whole from the HTML's drawHouse: the courses-and-studs wall, a planked
+# door with a handle, warm or dark windows with their mullions, and - the part
+# that was missing and made the roofs read as flat wedges - a proper shingled roof
+# with vertical battens and a ridge beam, topped by a chimney breathing smoke, or
+# for the ruins a hole punched through to the dark and a fallen second stack.
 func _draw_house_body() -> void:
-	draw_rect(Rect2(4, 9, w, h), Color(0, 0, 0, 0.5), true)
+	var rr := Rng.new(seed_val)
+	var R := func(x, y, ww, hh, c): draw_rect(Rect2(x, y, ww, hh), c, true)
+	R.call(4, 9, w, h, Color(0, 0, 0, 0.5))                       # ground shadow
+
 	var wall_y := h * 0.62
 	var wall_h := h * 0.38
-	draw_rect(Rect2(3, wall_y, w - 6, wall_h), Color("171410") if ruin else Color("1e1913"), true)
+	R.call(3, wall_y, w - 6, wall_h, Color("171410") if ruin else Color("1e1913"))
 	for i in range(int(wall_h / 6.0)):
-		draw_rect(Rect2(3, wall_y + i * 6 + 3, w - 6, 1),
-			Color("131009") if ruin else Color("191409"), true)
+		R.call(3, wall_y + i * 6 + 3, w - 6, 1, Color("131009") if ruin else Color("191409"))
 	for i in range(1, 5):
-		draw_rect(Rect2(3 + i * (w - 6) / 5.0, wall_y, 2, wall_h), Color("151108"), true)
-	draw_rect(Rect2(3, wall_y, w - 6, 2), Color("292219"), true)
-	# the roof
-	for i in range(int((h * 0.62) / 7.0)):
-		draw_rect(Rect2(i, i * 7, w - i * 2, 7),
-			Color("241c12") if i % 2 else Color("1d160e"), true)
-		draw_rect(Rect2(i, i * 7, w - i * 2, 1), Color("2e2416"), true)
-	# the door
+		R.call(3 + i * (w - 6) / 5.0, wall_y, 2, wall_h, Color("151108"))
+	R.call(3, wall_y, w - 6, 2, Color("292219"))
+
+	# the door: dark, planked, with a handle and frame highlights on the whole ones
 	var dw := 17.0
 	var dx := w / 2.0 - dw / 2.0
 	var dh := 21.0
-	draw_rect(Rect2(dx - 1, wall_y + wall_h - dh - 1, dw + 2, dh + 1), Color("171208"), true)
-	draw_rect(Rect2(dx, wall_y + wall_h - dh, dw, dh), Color("0b0906"), true)
-	# windows - the only warm light in the village, and only for the lit houses
+	R.call(dx - 1, wall_y + wall_h - dh - 1, dw + 2, dh + 1, Color("171208"))
+	R.call(dx, wall_y + wall_h - dh, dw, dh, Color("0b0906"))
+	for i in range(1, 4):
+		R.call(dx + i * dw / 4.0, wall_y + wall_h - dh, 1, dh, Color("141009"))
+	if not ruin:
+		R.call(dx + dw - 4, wall_y + wall_h - 11, 2, 2, Color("5c5140"))   # handle
+		R.call(dx + 1, wall_y + wall_h - dh + 3, dw - 2, 1, Color("251d12"))
+		R.call(dx + 1, wall_y + wall_h - 5, dw - 2, 1, Color("251d12"))
+
+	# windows - warm for the lit houses, dark otherwise, each with its cross mullion
 	var win_y := wall_y + 6
 	for wx in [11.0, w - 24.0]:
-		draw_rect(Rect2(wx - 1, win_y - 1, 15, 12), Color("100c07"), true)
+		R.call(wx - 1, win_y - 1, 15, 12, Color("100c07"))
 		if lit and not ruin:
-			draw_rect(Rect2(wx, win_y, 13, 10), Color("3d2c10"), true)
-			draw_rect(Rect2(wx + 1, win_y + 1, 11, 8), Color("b87c22"), true)
-			draw_rect(Rect2(wx + 2, win_y + 2, 9, 6), Color("d99b34"), true)
-			draw_rect(Rect2(wx + 4, win_y + 3, 4, 3), Color("efc164"), true)
+			R.call(wx, win_y, 13, 10, Color("3d2c10"))
+			R.call(wx + 1, win_y + 1, 11, 8, Color("b87c22"))
+			R.call(wx + 2, win_y + 2, 9, 6, Color("d99b34"))
+			R.call(wx + 4, win_y + 3, 4, 3, Color("efc164"))
 		else:
-			draw_rect(Rect2(wx, win_y, 13, 10), Color("0a0806"), true)
+			R.call(wx, win_y, 13, 10, Color("0a0806"))
+			R.call(wx + 1, win_y + 1, 11, 8, Color("0d0b08"))
+		R.call(wx + 6, win_y, 1, 10, Color("241a0d"))
+		R.call(wx, win_y + 4, 13, 1, Color("241a0d"))
+
+	# the roof: shingle rows that taper inward, vertical battens, an eave, a ridge
+	var roof_h := h * 0.62
+	var mid_x := w / 2.0
+	for i in range(int(roof_h)):
+		var t2 := i / roof_h
+		var inset := (1.0 - t2) * 4.0
+		var c := Color("1b1a19") if ruin else Color("232224")
+		if i % 7 == 0:
+			c = Color("141312") if ruin else Color("191819")
+		elif i % 7 == 1:
+			c = Color("1f1e1c") if ruin else Color("282729")
+		R.call(-3 + inset, i, w + 6 - inset * 2.0, 1, c)
+	for k in range(int(w / 13.0)):
+		var px := 2 + k * 13 + (k % 2) * 5
+		R.call(px, 3, 1, roof_h - 5, Color("151413") if ruin else Color("1c1b1d"))
+	R.call(-3, roof_h - 3, w + 6, 3, Color("0f0e0d"))
+	R.call(mid_x - 2, 2, 4, roof_h - 4, Color("333234"))
+	R.call(mid_x - 2, 2, 1, roof_h - 4, Color("3d3c3f"))
+
+	if ruin:
+		var hx := mid_x - 12 + rr.next() * 16.0                    # a hole to the dark
+		R.call(hx, 5, 18, roof_h * 0.62, Color("0a0a09"))
+		R.call(hx + 3, 3, 11, 3, Color("141313"))
+		R.call(mid_x + 4, roof_h * 0.3, 9, roof_h * 0.5, Color("0a0a09"))
+	else:
+		var cx2 := w * 0.72                                        # chimney + smoke
+		R.call(cx2, -11, 9, 14, Color("1a1917"))
+		R.call(cx2, -13, 9, 3, Color("262421"))
+		R.call(cx2 + 1, -12, 3, 1, Color("0d0c0b"))
+		for s in 3:
+			var sy2 := -15.0 - s * 5.0 - float(int(sin(t * 0.7 + seed_val + s) * 2.0))
+			var sx := cx2 + 3.0 + sin(t * 0.5 + s + seed_val) * 3.0
+			R.call(sx, sy2, 3.0 - s * 0.5, 2, Color(60.0 / 255, 58.0 / 255, 54.0 / 255, 0.16 - s * 0.04))
 
 
 func _draw_tree() -> void:

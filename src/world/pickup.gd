@@ -20,6 +20,7 @@ var _item: ItemData
 
 func _ready() -> void:
 	ph = randf() * TAU
+	add_to_group(&"drops")
 	_item = ItemDb.get_item(item_id)
 	_player = get_tree().get_first_node_in_group(&"player") as Node2D
 

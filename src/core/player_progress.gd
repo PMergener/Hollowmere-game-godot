@@ -19,6 +19,21 @@ var embers: int = 0
 ## skill id -> ranks owned
 var _skill_ranks: Dictionary = {}
 
+## One-way story flags the content chain latches - the sigil has been named, the
+## Sewer Key has been handed over, the north gate is unbarred. This mirrors the
+## HTML build's scattered state consts (SIGIL.known, SEWER_KEY.given,
+## NORTH_GATE.unlocked); they are world state, not "how strong am I", but this is
+## the persistent singleton that already survives area travel and resets on death.
+var _flags: Dictionary = {}
+
+
+func set_flag(flag: StringName) -> void:
+	_flags[flag] = true
+
+
+func has_flag(flag: StringName) -> bool:
+	return bool(_flags.get(flag, false))
+
 
 func _ready() -> void:
 	if ResourceLoader.exists(DEFAULT_PROGRESSION):
@@ -37,6 +52,7 @@ func reset() -> void:
 	embers = progression.starting_embers
 	xp_to_next = progression.xp_to_reach(1)
 	_skill_ranks.clear()
+	_flags.clear()
 	EventBus.currency_changed.emit()
 
 

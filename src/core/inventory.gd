@@ -96,8 +96,14 @@ func has_item(item_id: StringName) -> bool:
 
 
 ## Total armour from every worn piece.
+## Nestor's fixed kit - dark linen hood +1, black tunic +2, leather trousers +1,
+## leather boots +1 - is always worn and not an item you can remove, exactly as
+## in the HTML build. Worn body armour (mail, plate) stacks on top of it.
+const BASE_ARMOR := 5
+
+
 func armor_total() -> int:
-	var total := 0
+	var total := BASE_ARMOR
 	for stack: ItemStack in worn.values():
 		if stack != null and stack.item is ArmorData:
 			total += (stack.item as ArmorData).armor

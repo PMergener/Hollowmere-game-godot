@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://cb4d2d0d06280"]
+
+[ext_resource type="Script" path="res://src/resources/skill_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"flame"
+display_name = "Thy Flame Shines Brighter"
+description = "The dark gives more ground to the light you carry."
+base_cost = 30
+cost_inflation = 1.2
+max_rank = 2
+effect = &"light_radius"
+magnitude_per_rank = 0.25

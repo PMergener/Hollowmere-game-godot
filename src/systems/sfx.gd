@@ -30,6 +30,11 @@ func _ready() -> void:
 	_ambience.bus = &"Master"
 	add_child(_ambience)
 	_build_all()
+	# A couple of sounds are universal enough to wire straight to the event bus
+	# rather than making every caller remember them. Connected once, here - it used
+	# to live in stop_ambience(), which re-subscribed on every trip underground and
+	# stacked the level-up chime one louder each time.
+	EventBus.level_gained.connect(func(_lvl: int) -> void: play(&"levelup"))
 
 
 ## Starts a looping bed - rain over the village - under everything. Passing "" or
@@ -45,9 +50,6 @@ func play_ambience(sound_name: StringName, volume_db: float = -8.0) -> void:
 
 func stop_ambience() -> void:
 	_ambience.stop()
-	# A couple of sounds are universal enough to wire straight to the event bus
-	# rather than making every caller remember them.
-	EventBus.level_gained.connect(func(_lvl): play(&"levelup"))
 
 
 ## Plays a named sound. Unknown names are ignored rather than erroring, so a
@@ -115,23 +117,90 @@ func _build_all() -> void:
 			_osc(buf, "triangle", i * 0.11, 0.65, notes[i], notes[i], false, 0.04, 0.05, 0.6))
 
 	_bank[&"rain"] = _build_rain()
+	_bank[&"hum"] = _build_hum()
+	# A dry bone knock: a short high click of noise over a low woody tick.
+	_bank[&"bone"] = _render(0.16, func(buf: PackedFloat32Array) -> void:
+		_noise(buf, 0.0, 0.10, 0.15, [[0.0, 2600.0], [1.0, 1400.0]], 1.5, 0.004, 0.26, 0.09)
+		_osc(buf, "triangle", 0.0, 0.10, 190.0, 120.0, true, 0.004, 0.20, 0.09))
+	# A whisper: three breathy band-passed syllables, no pitch, just air shaped into
+	# something that was almost a word. Bandpasses climbing 700->2000 Hz.
+	_bank[&"whisper"] = _render(1.3, func(buf: PackedFloat32Array) -> void:
+		_noise(buf, 0.00, 0.34, 0.4, [[0.0, 700.0], [1.0, 1900.0]], 4.0, 0.05, 0.22, 0.30)
+		_noise(buf, 0.40, 0.30, 0.4, [[0.0, 900.0], [1.0, 1600.0]], 4.5, 0.05, 0.20, 0.28)
+		_noise(buf, 0.74, 0.40, 0.4, [[0.0, 800.0], [1.0, 2000.0]], 4.0, 0.05, 0.24, 0.40))
+	# An owl's two-note call: a soft low "hoo... hoo", the second lower and longer.
+	_bank[&"owl"] = _render(0.95, func(buf: PackedFloat32Array) -> void:
+		_osc(buf, "sine", 0.0, 0.30, 402.0, 360.0, false, 0.04, 0.34, 0.24)
+		_osc(buf, "sine", 0.02, 0.30, 201.0, 180.0, false, 0.04, 0.12, 0.24)   # a fifth under
+		_osc(buf, "sine", 0.40, 0.44, 322.0, 286.0, false, 0.05, 0.38, 0.36)
+		_osc(buf, "sine", 0.42, 0.44, 161.0, 143.0, false, 0.05, 0.13, 0.36))
 
 
-## A two-second loop of gentle rain: a low-passed "shhh" bed with sparse brighter
-## patter over it. The tail is cross-faded into the head so the loop has no seam.
-func _build_rain() -> AudioStreamWAV:
-	var n := RATE * 2
+## The underground bed: the HTML's deep hum. Two sub-oscillators at 34 and 34.6 Hz
+## beating against each other about once every 1.7s, a 51 Hz triangle body, a
+## whisper of noise for air, everything rolled off under a 120 Hz low-pass and
+## breathing on a very slow swell. Meant to be felt, not heard. A 10s loop: 34,
+## 34.6 and 51 Hz all complete whole cycles in 10s, so the tones loop with no seam
+## and a short crossfade hides the swell's.
+func _build_hum() -> AudioStreamWAV:
+	var n := RATE * 10
 	var buf := PackedFloat32Array()
 	buf.resize(n)
 	var lp := 0.0
+	const A_LP := 0.0233                      # one-pole low-pass at ~120 Hz
 	for i in n:
-		var white := randf() * 2.0 - 1.0
-		lp = lp * 0.96 + white * 0.04       # one-pole low-pass: the rain bed
-		var s := lp * 3.0
-		if randf() < 0.03:                  # the odd bigger drop striking
-			s += (randf() * 2.0 - 1.0) * 0.5
-		buf[i] = s * 0.09
-	var fade := 500
+		var tt := float(i) / RATE
+		var ph := 51.0 * tt
+		var tri := 4.0 * absf(ph - floorf(ph + 0.5)) - 1.0
+		var s := 0.5 * sin(TAU * 34.0 * tt) + 0.5 * sin(TAU * 34.6 * tt) + 0.22 * tri
+		s += (randf() * 2.0 - 1.0) * 0.05     # air
+		lp += (s - lp) * A_LP
+		var swell := 1.0 + 0.30 * sin(TAU * 0.1 * tt)
+		buf[i] = lp * 0.5 * swell
+	var fade := 1200
+	for i in fade:
+		var a := float(i) / fade
+		buf[i] = lerpf(buf[n - fade + i], buf[i], a)
+	var wav := _to_wav(buf)
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = n
+	return wav
+
+
+## The rain bed, to the HTML build's EXACT recipe - the earlier port missed the two
+## things that made it read as rain rather than harsh hiss:
+##   * the white noise is PRE-SMOOTHED (s2 = s2*0.32 + w*0.68) before it ever reaches
+##     the filters. Raw white noise band-passed is a fizzing static; the one-pole on
+##     the source is what turns it into a soft wash.
+##   * a slow LFO drifts the LOW-PASS CUTOFF (1750 +-430 Hz), so the brightness of
+##     the rain breathes - a fixed filter reads as a flat sheet of noise.
+## A second slower LFO gusts the level. HP 480 throughout. A 12s loop (one full
+## brightness breath) with the tail cross-faded into the head. Played quiet, near
+## the HTML's baseVol 0.05, so it sits UNDER the game instead of over it.
+func _build_rain() -> AudioStreamWAV:
+	var n := RATE * 12
+	var buf := PackedFloat32Array()
+	buf.resize(n)
+	const A_HP := 0.9139                 # one-pole high-pass at 480 Hz
+	var s2 := 0.0                        # pre-smoothing state on the source noise
+	var lp := 0.0
+	var hp := 0.0
+	var prev := 0.0
+	for i in n:
+		var tt := float(i) / RATE
+		var w := randf() * 2.0 - 1.0
+		s2 = s2 * 0.32 + w * 0.68        # soften the noise BEFORE the filters
+		# low-pass cutoff drifts 1750 +-430 Hz on a slow breath -> brightness moves
+		var fc := 1750.0 + 430.0 * sin(TAU * tt / 12.0)
+		var a_lp: float = clampf(1.0 - exp(-TAU * fc / RATE), 0.0, 1.0)
+		lp += (s2 - lp) * a_lp
+		hp = A_HP * (hp + lp - prev)
+		prev = lp
+		# a slower gust on the level, +-22%, two cycles across the loop
+		var gust := 1.0 + 0.22 * sin(TAU * tt / 6.0)
+		buf[i] = hp * 0.85 * gust
+	var fade := 1500
 	for i in fade:
 		var a := float(i) / fade
 		buf[i] = lerpf(buf[n - fade + i], buf[i], a)

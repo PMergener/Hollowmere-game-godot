@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="ArmorData" load_steps=2 format=3 uid="uid://c4b49bd27f5bd"]
+
+[ext_resource type="Script" path="res://src/resources/armor_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"plate"
+display_name = "Warden's Plate"
+description = "Off a warden who stopped needing it."
+buy_price = 90
+can_sell = false
+slot = 4
+armor = 5

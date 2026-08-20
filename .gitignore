@@ -5,3 +5,7 @@
 tools/.chrome-profile/
 tools/.bake*.html
 tools/screenshot.png
+tools/shot.gd
+tools/shot.gd.uid
+tools/*.png
+tools/reference.html

@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://c444a772c9a43"]
+
+[ext_resource type="Script" path="res://src/resources/skill_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"steal"
+display_name = "Soul Steal"
+description = "What you put down leaves something behind."
+base_cost = 30
+cost_inflation = 1.2
+max_rank = 2
+effect = &"soul_steal"
+magnitude_per_rank = 1.0

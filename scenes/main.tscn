@@ -1,4 +1,4 @@
-[gd_scene load_steps=11 format=3 uid="uid://cmain000001"]
+[gd_scene load_steps=19 format=3 uid="uid://cmain000001"]
 
 [ext_resource type="Script" path="res://src/main.gd" id="1_main"]
 [ext_resource type="Script" path="res://src/systems/weather.gd" id="2_weather"]
@@ -9,6 +9,14 @@
 [ext_resource type="Script" path="res://src/ui/pack_panel.gd" id="7_pack"]
 [ext_resource type="Script" path="res://src/ui/dialogue_box.gd" id="8_dlg"]
 [ext_resource type="Script" path="res://src/ui/journal.gd" id="9_jrnl"]
+[ext_resource type="Script" path="res://src/ui/minimap.gd" id="10_mini"]
+[ext_resource type="Script" path="res://src/ui/shop_panel.gd" id="11_shop"]
+[ext_resource type="Script" path="res://src/ui/death_screen.gd" id="12_death"]
+[ext_resource type="Script" path="res://src/ui/skill_panel.gd" id="13_skill"]
+[ext_resource type="Script" path="res://src/ui/boss_bar.gd" id="14_boss"]
+[ext_resource type="Script" path="res://src/ui/ending_screen.gd" id="15_end"]
+[ext_resource type="Script" path="res://src/ui/hints_panel.gd" id="16_hints"]
+[ext_resource type="Script" path="res://src/ui/banner.gd" id="17_banner"]
 
 [node name="Main" type="Node2D"]
 script = ExtResource("1_main")
@@ -37,6 +45,24 @@ script = ExtResource("4_hud")
 [node name="Painter" type="Node2D" parent="HUD"]
 script = ExtResource("5_hpaint")
 
+[node name="Minimap" type="CanvasLayer" parent="."]
+script = ExtResource("10_mini")
+
+[node name="Painter" type="Node2D" parent="Minimap"]
+script = ExtResource("5_hpaint")
+
+[node name="BossBar" type="CanvasLayer" parent="."]
+script = ExtResource("14_boss")
+
+[node name="Painter" type="Node2D" parent="BossBar"]
+script = ExtResource("5_hpaint")
+
+[node name="Banner" type="CanvasLayer" parent="."]
+script = ExtResource("17_banner")
+
+[node name="Painter" type="Node2D" parent="Banner"]
+script = ExtResource("5_hpaint")
+
 [node name="Messages" type="CanvasLayer" parent="."]
 script = ExtResource("6_msg")
 
@@ -51,6 +77,30 @@ script = ExtResource("9_jrnl")
 
 [node name="Painter" type="Node2D" parent="Journal"]
 script = ExtResource("5_hpaint")
+
+[node name="ShopPanel" type="CanvasLayer" parent="."]
+script = ExtResource("11_shop")
+
+[node name="Painter" type="Node2D" parent="ShopPanel"]
+script = ExtResource("5_hpaint")
+
+[node name="SkillPanel" type="CanvasLayer" parent="."]
+script = ExtResource("13_skill")
+
+[node name="Painter" type="Node2D" parent="SkillPanel"]
+script = ExtResource("5_hpaint")
+
+[node name="DeathScreen" type="CanvasLayer" parent="."]
+script = ExtResource("12_death")
+
+[node name="HintsPanel" type="CanvasLayer" parent="."]
+script = ExtResource("16_hints")
+
+[node name="Painter" type="Node2D" parent="HintsPanel"]
+script = ExtResource("5_hpaint")
+
+[node name="EndingScreen" type="CanvasLayer" parent="."]
+script = ExtResource("15_end")
 
 [node name="DialogueBox" type="CanvasLayer" parent="."]
 script = ExtResource("8_dlg")

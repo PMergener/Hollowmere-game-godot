@@ -1,0 +1,10 @@
+[gd_resource type="Resource" script_class="ItemData" load_steps=2 format=3 uid="uid://cad632e735f59"]
+
+[ext_resource type="Script" path="res://src/resources/item_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"letter"
+display_name = "Aldric's Letter"
+hover_hint = "Four pages, water-stained. Read it in the journal."
+can_sell = false

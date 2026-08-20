@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3 uid="uid://cfcd482dd6c1a"]
+
+[ext_resource type="Script" path="res://src/resources/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sword_long"
+display_name = "Long sword"
+description = "Longer, narrower, a swept guard. It outreaches the short sword."
+can_sell = false
+damage = 12
+reach = 5.0
+cooldown = 0.44
+style = 0

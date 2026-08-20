@@ -44,6 +44,26 @@ func melee_hit_offset() -> float:
 	return 18.0
 
 
+# The shriek is the alarm, and it has to sound whether the wraith wakes by being
+# HELD in the lamp past the limit or by being CUT - and cutting it is the common
+# case, so the old code (which only shrieked on the exposure path) meant most
+# wraiths went hostile in silence. Waking is one place now, reached from both.
+func _wake() -> void:
+	spd = 39.0 + randf() * 15.0
+	Sfx.play(&"shriek")
+	Sfx.play(&"growl", -6.0)
+	EventBus.toast("It has seen you.")
+
+
+func take_melee_hit(damage: int, from_position: Vector2) -> void:
+	if not is_hittable():
+		return
+	var was_hostile := hostile
+	super(damage, from_position)
+	if not was_hostile and not gone:
+		_wake()
+
+
 func is_hittable() -> bool:
 	return not gone and dying <= 0.0 and alpha() > 0.15
 
@@ -76,7 +96,9 @@ func alpha() -> float:
 
 
 func _light_scale() -> float:
-	return 1.0  # widened by the Thy Flame skill once skills land
+	# Thy Flame widens the reveal exactly as it widens the light - a bigger lamp
+	# that revealed no more wraiths would be a lie about the skill.
+	return 1.0 + SkillDb.effect_total(&"light_radius")
 
 
 func _death_seconds() -> float:
@@ -92,9 +114,7 @@ func _think(delta: float) -> void:
 
 	if not hostile and exp_time >= EXPOSE_LIMIT:
 		hostile = true
-		spd = 39.0 + randf() * 15.0
-		Sfx.play(&"shriek")
-		EventBus.toast("It has seen you.")
+		_wake()
 
 	if atk_cd > 0.0:
 		atk_cd -= delta

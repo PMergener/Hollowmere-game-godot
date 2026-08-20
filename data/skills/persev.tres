@@ -1,0 +1,14 @@
+[gd_resource type="Resource" script_class="SkillData" load_steps=2 format=3 uid="uid://c3014360deda8"]
+
+[ext_resource type="Script" path="res://src/resources/skill_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"persev"
+display_name = "Perseverance"
+description = "The lamp drinks the dark back in faster when stowed."
+base_cost = 30
+cost_inflation = 1.2
+max_rank = 2
+effect = &"lamp_regen"
+magnitude_per_rank = 2.0

@@ -64,6 +64,10 @@ static func eye_colour(kind: String, t: float) -> Color:
 	if kind == "rot":
 		var rp := 0.62 + 0.38 * sin(t * 1.5)
 		return Color8(int(150 + 72 * rp), int(168 + 56 * rp), int(60 + 40 * rp))
+	if kind == "hunter":
+		# the only green eyes in the game - the Fallen Hunter, wearing the coat
+		var hp := 0.7 + 0.3 * sin(t * 2.9)
+		return Color8(int(56 * hp), int(190 + 34 * hp), int(104 + 26 * hp))
 	return Color8(int(194 * ep), int(42 * ep), int(30 * ep))
 
 

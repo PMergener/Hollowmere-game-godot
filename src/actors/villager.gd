@@ -13,12 +13,19 @@ extends Actor
 @export var palette_index: int = 0
 @export var interact_radius: float = 26.0
 
+## How long a villager stops and faces you after being spoken to, matching how
+## long its line stays on screen.
+const INTERACT_HOLD := 3.2
+
 var _wander: Wander
 var _pal: Dictionary
+var _hold := 0.0
+var _speaker: Node2D
 
 
 func _ready() -> void:
 	add_to_group(&"interactable")
+	add_to_group(&"villagers")
 	move_speed = 24.0 + randf() * 12.0
 	body_radius = 7.0
 	_pal = Figure.PAL_NPC[palette_index % Figure.PAL_NPC.size()]
@@ -28,6 +35,18 @@ func _ready() -> void:
 
 func _process(delta: float) -> void:
 	t += delta
+
+	# While engaged, stop wandering and keep facing whoever is speaking - the
+	# villager holds still and answers, then resumes its rounds. This is a state,
+	# not a slowdown: it never takes a wander step until the hold runs out.
+	if _hold > 0.0:
+		_hold -= delta
+		moving = false
+		if _speaker != null and is_instance_valid(_speaker):
+			face_toward(_speaker.global_position - global_position)
+		queue_redraw()
+		return
+
 	_wander.wait -= delta
 	if _wander.wait > 0.0:
 		moving = false
@@ -57,10 +76,13 @@ func can_interact() -> bool:
 	return true
 
 
-func interact(_by: Node) -> void:
-	# Face whoever is speaking to us, then answer.
-	if _by is Node2D:
-		face_toward((_by as Node2D).global_position - global_position)
+func interact(by: Node) -> void:
+	# Stop, turn to whoever is speaking, and hold there while we answer.
+	if by is Node2D:
+		_speaker = by
+		face_toward((by as Node2D).global_position - global_position)
+	_hold = INTERACT_HOLD
+	moving = false
 	if line.strip_edges().is_empty():
 		EventBus.toast("They only stare at you.")
 	else:

@@ -13,12 +13,23 @@ extends Node
 
 var solids: Array[Rect2] = []
 var world_size: float = 1200.0
+var world_h: float = 1200.0
 var edge: float = 36.0
 
 
-func set_solids(rects: Array[Rect2], size: float = 1200.0, edge_margin: float = 36.0) -> void:
+func set_solids(rects: Array[Rect2], size: float = 1200.0, edge_margin: float = 36.0, height: float = -1.0) -> void:
 	solids = rects
 	world_size = size
+	world_h = height if height > 0.0 else size
+	edge = edge_margin
+
+
+## Sets a rectangular play area, for a dungeon room wider than it is tall. Walls
+## are the edge; interior obstacles are added with [method add_solid].
+func set_bounds(width: float, height: float, edge_margin: float) -> void:
+	solids = []
+	world_size = width
+	world_h = height
 	edge = edge_margin
 
 
@@ -50,7 +61,7 @@ func blocked(x: float, y: float, r: float = 6.0) -> bool:
 		if x + r > s.position.x and x - r < s.position.x + s.size.x \
 		   and y + r * 0.7 > s.position.y and y - 3.0 < s.position.y + s.size.y:
 			return true
-	return x < edge or y < edge or x > world_size - edge or y > world_size - edge
+	return x < edge or y < edge or x > world_size - edge or y > world_h - edge
 
 
 ## Straight-line walkability, sampled every ~10px. Not pathfinding - just enough

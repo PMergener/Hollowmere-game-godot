@@ -84,6 +84,13 @@ func _ready() -> void:
 
 	_populate_village()
 
+	# The editable props layer: open scenes/areas/village_props.tscn to drag
+	# trees, rocks, chests and crates around by hand. This is the map-editing
+	# workflow - placed nodes, not coordinate tables.
+	var props_path := "res://scenes/areas/village_props.tscn"
+	if ResourceLoader.exists(props_path):
+		y_sort.add_child((load(props_path) as PackedScene).instantiate())
+
 	var interaction := Node.new()
 	interaction.set_script(load("res://src/systems/interaction.gd"))
 	add_child(interaction)

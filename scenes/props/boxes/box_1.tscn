@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://d52a2e7ed0470"]
+
+[ext_resource type="Script" path="res://src/world/box.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c61a12af5f0ab" path="res://assets/props/boxes/box_1.png" id="2"]
+
+[node name="Box1" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1")
+texture = ExtResource("2")
+collision_size = Vector2(14, 8)
+
+[node name="Art" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+offset = Vector2(0, -10.0)

@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://d83dc54a4eefc"]
+
+[ext_resource type="Script" path="res://src/world/chest.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://cf3d8eaf48d35" path="res://assets/props/chests/chest_1.png" id="2"]
+
+[node name="Chest1" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1")
+texture = ExtResource("2")
+collision_size = Vector2(14, 7)
+
+[node name="Art" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+offset = Vector2(0, -9.5)

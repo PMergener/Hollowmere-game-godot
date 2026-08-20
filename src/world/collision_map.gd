@@ -22,6 +22,26 @@ func set_solids(rects: Array[Rect2], size: float = 1200.0, edge_margin: float = 
 	edge = edge_margin
 
 
+## Drops every solid, for when a new area is about to register its own. Props
+## and walls in the arriving scene add themselves back through [method add_solid].
+func clear_solids(size: float = 1200.0, edge_margin: float = 36.0) -> void:
+	solids = []
+	world_size = size
+	edge = edge_margin
+
+
+## Adds one blocking rectangle - a placed tree's trunk, a chest's footprint. The
+## rectangle is in world space; a prop computes it from where it was dropped.
+func add_solid(rect: Rect2) -> void:
+	solids.append(rect)
+
+
+## Removes a rectangle a prop added, for a crate that has just been smashed. The
+## prop passes back the exact rect it registered, so the match is precise.
+func remove_solid(rect: Rect2) -> void:
+	solids.erase(rect)
+
+
 ## blocked(x, y, r) from the HTML build, including the asymmetric vertical test.
 ## The 0.7 and the -3 push the collision box down to the figure's FEET, so a
 ## top-down sprite reads as standing behind what it overlaps, not floating in it.

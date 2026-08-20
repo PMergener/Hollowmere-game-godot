@@ -1,0 +1,14 @@
+[gd_scene load_steps=3 format=3 uid="uid://d7f3790b38048"]
+
+[ext_resource type="Script" path="res://src/world/prop_sprite.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://c68b25a9973c6" path="res://assets/props/rocks/rock_6.png" id="2"]
+
+[node name="Rock6" type="Node2D"]
+y_sort_enabled = true
+script = ExtResource("1")
+texture = ExtResource("2")
+collision_size = Vector2(16, 8)
+
+[node name="Art" type="Sprite2D" parent="."]
+texture = ExtResource("2")
+offset = Vector2(0, -12.0)

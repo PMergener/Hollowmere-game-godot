@@ -182,7 +182,10 @@ func _apply_shake(delta: float) -> void:
 		return
 	var cam := get_node_or_null(^"Camera") as Camera2D
 	if cam != null:
-		cam.offset = Vector2(randf() - 0.5, randf() - 0.5) * _shake * 3.0
+		# A fast coherent tremor, exactly as the HTML build: a high-frequency
+		# sine on each axis. Coherent back-and-forth reads as a shake where
+		# per-frame random noise just reads as a blur.
+		cam.offset = Vector2(sin(t * 97.0) * _shake * 2.0, cos(t * 83.0) * _shake * 1.6)
 	_shake = maxf(0.0, _shake - delta * 7.0)
 	if _shake <= 0.0 and cam != null:
 		cam.offset = Vector2.ZERO

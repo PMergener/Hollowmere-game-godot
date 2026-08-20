@@ -17,6 +17,7 @@ var muted := false
 var _bank: Dictionary = {}
 var _players: Array[AudioStreamPlayer] = []
 var _next := 0
+var _ambience: AudioStreamPlayer
 
 
 func _ready() -> void:
@@ -25,7 +26,25 @@ func _ready() -> void:
 		p.bus = &"Master"
 		add_child(p)
 		_players.append(p)
+	_ambience = AudioStreamPlayer.new()
+	_ambience.bus = &"Master"
+	add_child(_ambience)
 	_build_all()
+
+
+## Starts a looping bed - rain over the village - under everything. Passing "" or
+## an unknown name stops it.
+func play_ambience(sound_name: StringName, volume_db: float = -8.0) -> void:
+	if not _bank.has(sound_name):
+		_ambience.stop()
+		return
+	_ambience.stream = _bank[sound_name]
+	_ambience.volume_db = volume_db
+	_ambience.play()
+
+
+func stop_ambience() -> void:
+	_ambience.stop()
 	# A couple of sounds are universal enough to wire straight to the event bus
 	# rather than making every caller remember them.
 	EventBus.level_gained.connect(func(_lvl): play(&"levelup"))
@@ -94,6 +113,33 @@ func _build_all() -> void:
 		var notes := [349.0, 466.0, 587.0]
 		for i in notes.size():
 			_osc(buf, "triangle", i * 0.11, 0.65, notes[i], notes[i], false, 0.04, 0.05, 0.6))
+
+	_bank[&"rain"] = _build_rain()
+
+
+## A two-second loop of gentle rain: a low-passed "shhh" bed with sparse brighter
+## patter over it. The tail is cross-faded into the head so the loop has no seam.
+func _build_rain() -> AudioStreamWAV:
+	var n := RATE * 2
+	var buf := PackedFloat32Array()
+	buf.resize(n)
+	var lp := 0.0
+	for i in n:
+		var white := randf() * 2.0 - 1.0
+		lp = lp * 0.96 + white * 0.04       # one-pole low-pass: the rain bed
+		var s := lp * 3.0
+		if randf() < 0.03:                  # the odd bigger drop striking
+			s += (randf() * 2.0 - 1.0) * 0.5
+		buf[i] = s * 0.09
+	var fade := 500
+	for i in fade:
+		var a := float(i) / fade
+		buf[i] = lerpf(buf[n - fade + i], buf[i], a)
+	var wav := _to_wav(buf)
+	wav.loop_mode = AudioStreamWAV.LOOP_FORWARD
+	wav.loop_begin = 0
+	wav.loop_end = n
+	return wav
 
 
 ## Runs a fill closure over a fresh buffer of [param dur] seconds, then packs it

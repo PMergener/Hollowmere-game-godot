@@ -103,6 +103,16 @@ func quests_for_giver(giver: String) -> Array[QuestData]:
 	return out
 
 
+## The first quest this speaker has in a given state, or null. Lets an NPC ask
+## "have I anything to hand back?" then "anything to offer?" in turn.
+func giver_quest_in(giver: String, want: State) -> QuestData:
+	for id: StringName in _quests:
+		var quest: QuestData = _quests[id]
+		if quest.giver == giver and _state[id] == want:
+			return quest
+	return null
+
+
 # --- Changing state ---------------------------------------------------------
 
 ## Brings a hidden or locked quest into play.

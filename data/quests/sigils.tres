@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=2 format=3 uid="uid://cbdd4bbb6d82e"]
+
+[ext_resource type="Script" path="res://src/resources/quest_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"sigils"
+title = "Sigils"
+giver = "Nestor"
+objective = "Find more about the eerie magic coming from the sigils"
+required_count = 3
+xp_reward = 60
+start_state = 0

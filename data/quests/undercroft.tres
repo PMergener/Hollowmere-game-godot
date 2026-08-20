@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=2 format=3 uid="uid://cffbaf2160ea2"]
+
+[ext_resource type="Script" path="res://src/resources/quest_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"undercroft"
+title = "What Stirs Beneath"
+giver = "Herbert"
+objective = "Clear the undercroft"
+counts_event = &"skeleton_killed"
+required_count = 7
+xp_reward = 50
+gold_reward = 25
+start_state = 1

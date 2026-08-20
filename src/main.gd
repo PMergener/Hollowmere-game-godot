@@ -92,8 +92,16 @@ func _ready() -> void:
 	if hud:
 		hud.player = player
 
+	# The rain is always falling on Hollowmere; a looping bed under everything.
+	Sfx.play_ambience(&"rain", -9.0)
+
 
 func _populate_village() -> void:
+	var herbert := Herbert.new()
+	herbert.position = Vector2(638, 488)
+	herbert.facing = 0  # 0 = facing down, toward the square
+	y_sort.add_child(herbert)
+
 	for i in WorldData.VILLAGER_SPOTS.size():
 		var v := Villager.new()
 		v.position = WorldData.VILLAGER_SPOTS[i]

@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=2 format=3 uid="uid://ce9c2bfe25fa3"]
+
+[ext_resource type="Script" path="res://src/resources/quest_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"elphric"
+title = "What Became of Elphric"
+giver = "The Order"
+objective = "Report to Herbert what you found below"
+required_count = 1
+xp_reward = 80
+start_state = 0

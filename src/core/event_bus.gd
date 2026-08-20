@@ -64,6 +64,9 @@ signal shake_requested(amount: float, seconds: float)
 
 signal dialogue_started(dialogue: DialogueData, speaker_name: String)
 signal dialogue_finished()
+## Ask the dialogue box to speak some plain lines. The simplest way to make an
+## NPC talk: emit this with who is speaking and what they say.
+signal dialogue_requested(speaker: String, lines: PackedStringArray)
 signal note_read(title: String, body: String)
 ## A line of feedback across the middle of the screen.
 signal toast_requested(text: String)

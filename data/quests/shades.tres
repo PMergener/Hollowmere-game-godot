@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=3 format=3 uid="uid://c7468145a77bf"]
+
+[ext_resource type="Script" path="res://src/resources/quest_data.gd" id="1"]
+[ext_resource type="Resource" path="res://data/quests/undercroft.tres" id="2"]
+
+[resource]
+script = ExtResource("1")
+id = &"shades"
+title = "Shades, be gone!"
+giver = "Herbert"
+objective = "Banish 10 wraiths"
+counts_event = &"wraith_killed"
+required_count = 10
+xp_reward = 50
+start_state = 2
+unlocks = [ExtResource("2")]

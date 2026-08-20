@@ -1,0 +1,13 @@
+[gd_resource type="Resource" script_class="QuestData" load_steps=2 format=3 uid="uid://c347c2c4b2001"]
+
+[ext_resource type="Script" path="res://src/resources/quest_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+id = &"yotan"
+title = "The Road to Yotan"
+giver = "Herbert"
+objective = "Travel north to the city of Yotan"
+required_count = 1
+xp_reward = 100
+start_state = 0
